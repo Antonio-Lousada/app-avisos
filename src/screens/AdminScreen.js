@@ -2,19 +2,16 @@ import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
-  TextInput,
   Button,
   FlatList,
-  TouchableOpacity,
+  TextInput,
   StyleSheet,
-  Alert,
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const AdminScreen = ({ navigation }) => {
   const [avisos, setAvisos] = useState([]);
-  const [titulo, setTitulo] = useState("");
-  const [descricao, setDescricao] = useState("");
+  const [newAviso, setNewAviso] = useState({ titulo: "", descricao: "" });
 
   useEffect(() => {
     const loadAvisos = async () => {
@@ -26,16 +23,10 @@ const AdminScreen = ({ navigation }) => {
   }, []);
 
   const handleAddAviso = async () => {
-    const newAviso = {
-      id: Date.now(),
-      titulo,
-      descricao,
-    };
-    const updatedAvisos = [...avisos, newAviso];
+    const updatedAvisos = [...avisos, { ...newAviso, id: Date.now() }];
     setAvisos(updatedAvisos);
     await AsyncStorage.setItem("avisos", JSON.stringify(updatedAvisos));
-    setTitulo("");
-    setDescricao("");
+    setNewAviso({ titulo: "", descricao: "" });
   };
 
   const handleDeleteAviso = async (id) => {
@@ -50,32 +41,33 @@ const AdminScreen = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
-      <TextInput
-        placeholder="Título"
-        value={titulo}
-        onChangeText={setTitulo}
-        style={styles.input}
-      />
-      <TextInput
-        placeholder="Descrição"
-        value={descricao}
-        onChangeText={setDescricao}
-        style={styles.input}
-        multiline
-      />
-      <Button title="Adicionar Aviso" onPress={handleAddAviso} />
+      <Text style={styles.title}>Administração de Avisos</Text>
       <FlatList
         data={avisos}
+        keyExtractor={(item) => item.id.toString()}
         renderItem={({ item }) => (
           <View style={styles.avisoItem}>
-            <Text>{item.titulo}</Text>
-            <TouchableOpacity onPress={() => handleDeleteAviso(item.id)}>
-              <Text style={styles.deleteButton}>Excluir</Text>
-            </TouchableOpacity>
+            <Text style={styles.avisoTitle}>{item.titulo}</Text>
+            <Button
+              title="Excluir"
+              onPress={() => handleDeleteAviso(item.id)}
+            />
           </View>
         )}
-        keyExtractor={(item) => item.id.toString()}
       />
+      <TextInput
+        style={styles.input}
+        placeholder="Título do Aviso"
+        value={newAviso.titulo}
+        onChangeText={(text) => setNewAviso({ ...newAviso, titulo: text })}
+      />
+      <TextInput
+        style={styles.input}
+        placeholder="Descrição do Aviso"
+        value={newAviso.descricao}
+        onChangeText={(text) => setNewAviso({ ...newAviso, descricao: text })}
+      />
+      <Button title="Adicionar Aviso" onPress={handleAddAviso} />
       <Button title="Sair do modo Admin" onPress={handleLogout} />
     </View>
   );
@@ -86,21 +78,27 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 20,
   },
-  input: {
-    borderBottomWidth: 1,
-    borderBottomColor: "#ccc",
-    marginBottom: 10,
-    padding: 5,
+  title: {
+    fontSize: 24,
+    marginBottom: 20,
   },
   avisoItem: {
     flexDirection: "row",
     justifyContent: "space-between",
+    alignItems: "center",
     padding: 10,
     borderBottomWidth: 1,
     borderBottomColor: "#ccc",
   },
-  deleteButton: {
-    color: "red",
+  avisoTitle: {
+    fontSize: 18,
+  },
+  input: {
+    height: 40,
+    borderColor: "gray",
+    borderWidth: 1,
+    marginBottom: 10,
+    paddingHorizontal: 10,
   },
 });
 

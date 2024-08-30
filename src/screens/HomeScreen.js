@@ -21,15 +21,14 @@ const HomeScreen = ({ navigation }) => {
       setAvisos(JSON.parse(avisosData) || []);
     };
 
-    loadAvisos();
-
     const loadLidos = async () => {
       const lidosData = await AsyncStorage.getItem("lidos");
       setLidos(JSON.parse(lidosData) || {});
     };
 
+    loadAvisos();
     loadLidos();
-  }, []);
+  }, [isAdmin]); // Adicionando isAdmin aqui para recarregar quando o admin logar/deslogar
 
   const handlePress = async (id) => {
     const newLidos = { ...lidos, [id]: true };
@@ -49,8 +48,8 @@ const HomeScreen = ({ navigation }) => {
         },
         {
           text: "OK",
-          onPress: (password) => {
-            if (password === "admin1234") {
+          onPress: (text) => {
+            if (text === "admin1234") {
               setIsAdmin(true);
               navigation.navigate("Admin");
             } else {
