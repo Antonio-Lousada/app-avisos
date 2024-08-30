@@ -15,6 +15,7 @@ const HomeScreen = ({ navigation }) => {
   const [lidos, setLidos] = useState({});
   const [isAdmin, setIsAdmin] = useState(false);
 
+  // Carrega avisos e lidos quando o componente monta
   useEffect(() => {
     const loadAvisos = async () => {
       const avisosData = await AsyncStorage.getItem("avisos");
@@ -28,7 +29,16 @@ const HomeScreen = ({ navigation }) => {
 
     loadAvisos();
     loadLidos();
-  }, [isAdmin]); // Adicionando isAdmin aqui para recarregar quando o admin logar/deslogar
+  }, []);
+
+  // Atualiza a lista de avisos em tempo real
+  useEffect(() => {
+    const unsubscribe = navigation.addListener("focus", async () => {
+      const avisosData = await AsyncStorage.getItem("avisos");
+      setAvisos(JSON.parse(avisosData) || []);
+    });
+    return unsubscribe;
+  }, [navigation]);
 
   const handlePress = async (id) => {
     const newLidos = { ...lidos, [id]: true };
@@ -48,10 +58,10 @@ const HomeScreen = ({ navigation }) => {
         },
         {
           text: "OK",
-          onPress: (text) => {
-            if (text === "admin1234") {
+          onPress: (password) => {
+            if (password === "admin1234") {
               setIsAdmin(true);
-              navigation.navigate("Admin");
+              navigation.navigate("Admin", { onLogout: handleLogout });
             } else {
               Alert.alert("Erro", "Senha incorreta");
             }
@@ -60,6 +70,10 @@ const HomeScreen = ({ navigation }) => {
       ],
       "secure-text"
     );
+  };
+
+  const handleLogout = () => {
+    setIsAdmin(false);
   };
 
   const renderItem = ({ item }) => (

@@ -2,17 +2,19 @@ import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
+  TextInput,
   Button,
   FlatList,
-  TextInput,
+  TouchableOpacity,
   StyleSheet,
-  ScrollView,
+  Alert,
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-const AdminScreen = ({ navigation }) => {
+const AdminScreen = ({ navigation, route }) => {
   const [avisos, setAvisos] = useState([]);
-  const [newAviso, setNewAviso] = useState({ titulo: "", descricao: "" });
+  const [titulo, setTitulo] = useState("");
+  const [descricao, setDescricao] = useState("");
 
   useEffect(() => {
     const loadAvisos = async () => {
@@ -24,14 +26,16 @@ const AdminScreen = ({ navigation }) => {
   }, []);
 
   const handleAddAviso = async () => {
-    if (newAviso.titulo.trim() === "" || newAviso.descricao.trim() === "") {
-      alert("Por favor, preencha todos os campos.");
-      return;
-    }
-    const updatedAvisos = [...avisos, { ...newAviso, id: Date.now() }];
+    const newAviso = {
+      id: Date.now(),
+      titulo,
+      descricao,
+    };
+    const updatedAvisos = [...avisos, newAviso];
     setAvisos(updatedAvisos);
     await AsyncStorage.setItem("avisos", JSON.stringify(updatedAvisos));
-    setNewAviso({ titulo: "", descricao: "" });
+    setTitulo("");
+    setDescricao("");
   };
 
   const handleDeleteAviso = async (id) => {
@@ -41,45 +45,40 @@ const AdminScreen = ({ navigation }) => {
   };
 
   const handleLogout = () => {
-    navigation.navigate("Home");
+    route.params.onLogout(); // Chama a função passada para deslogar
+    navigation.navigate("Home"); // Navega para a tela inicial
   };
 
   return (
-    <ScrollView style={styles.container}>
-      <Text style={styles.title}>Administração de Avisos</Text>
-
-      {/* Campos de input e botão para adicionar aviso */}
+    <View style={styles.container}>
       <TextInput
+        placeholder="Título"
+        value={titulo}
+        onChangeText={setTitulo}
         style={styles.input}
-        placeholder="Título do Aviso"
-        value={newAviso.titulo}
-        onChangeText={(text) => setNewAviso({ ...newAviso, titulo: text })}
       />
       <TextInput
+        placeholder="Descrição"
+        value={descricao}
+        onChangeText={setDescricao}
         style={styles.input}
-        placeholder="Descrição do Aviso"
-        value={newAviso.descricao}
-        onChangeText={(text) => setNewAviso({ ...newAviso, descricao: text })}
+        multiline
       />
       <Button title="Adicionar Aviso" onPress={handleAddAviso} />
-
-      {/* Lista de avisos e botão de exclusão */}
       <FlatList
         data={avisos}
-        keyExtractor={(item) => item.id.toString()}
         renderItem={({ item }) => (
           <View style={styles.avisoItem}>
-            <Text style={styles.avisoTitle}>{item.titulo}</Text>
-            <Button
-              title="Excluir"
-              onPress={() => handleDeleteAviso(item.id)}
-            />
+            <Text>{item.titulo}</Text>
+            <TouchableOpacity onPress={() => handleDeleteAviso(item.id)}>
+              <Text style={styles.deleteButton}>Excluir</Text>
+            </TouchableOpacity>
           </View>
         )}
+        keyExtractor={(item) => item.id.toString()}
       />
-
       <Button title="Sair do modo Admin" onPress={handleLogout} />
-    </ScrollView>
+    </View>
   );
 };
 
@@ -87,29 +86,22 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 20,
-    backgroundColor: "#fff",
   },
-  title: {
-    fontSize: 24,
-    marginBottom: 20,
+  input: {
+    borderBottomWidth: 1,
+    borderBottomColor: "#ccc",
+    marginBottom: 10,
+    padding: 5,
   },
   avisoItem: {
     flexDirection: "row",
     justifyContent: "space-between",
-    alignItems: "center",
     padding: 10,
     borderBottomWidth: 1,
     borderBottomColor: "#ccc",
   },
-  avisoTitle: {
-    fontSize: 18,
-  },
-  input: {
-    height: 40,
-    borderColor: "gray",
-    borderWidth: 1,
-    marginBottom: 10,
-    paddingHorizontal: 10,
+  deleteButton: {
+    color: "red",
   },
 });
 
