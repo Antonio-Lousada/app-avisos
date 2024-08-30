@@ -6,6 +6,7 @@ import {
   FlatList,
   TextInput,
   StyleSheet,
+  ScrollView,
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
@@ -23,6 +24,10 @@ const AdminScreen = ({ navigation }) => {
   }, []);
 
   const handleAddAviso = async () => {
+    if (newAviso.titulo.trim() === "" || newAviso.descricao.trim() === "") {
+      alert("Por favor, preencha todos os campos.");
+      return;
+    }
     const updatedAvisos = [...avisos, { ...newAviso, id: Date.now() }];
     setAvisos(updatedAvisos);
     await AsyncStorage.setItem("avisos", JSON.stringify(updatedAvisos));
@@ -40,21 +45,10 @@ const AdminScreen = ({ navigation }) => {
   };
 
   return (
-    <View style={styles.container}>
+    <ScrollView style={styles.container}>
       <Text style={styles.title}>Administração de Avisos</Text>
-      <FlatList
-        data={avisos}
-        keyExtractor={(item) => item.id.toString()}
-        renderItem={({ item }) => (
-          <View style={styles.avisoItem}>
-            <Text style={styles.avisoTitle}>{item.titulo}</Text>
-            <Button
-              title="Excluir"
-              onPress={() => handleDeleteAviso(item.id)}
-            />
-          </View>
-        )}
-      />
+
+      {/* Campos de input e botão para adicionar aviso */}
       <TextInput
         style={styles.input}
         placeholder="Título do Aviso"
@@ -68,8 +62,24 @@ const AdminScreen = ({ navigation }) => {
         onChangeText={(text) => setNewAviso({ ...newAviso, descricao: text })}
       />
       <Button title="Adicionar Aviso" onPress={handleAddAviso} />
+
+      {/* Lista de avisos e botão de exclusão */}
+      <FlatList
+        data={avisos}
+        keyExtractor={(item) => item.id.toString()}
+        renderItem={({ item }) => (
+          <View style={styles.avisoItem}>
+            <Text style={styles.avisoTitle}>{item.titulo}</Text>
+            <Button
+              title="Excluir"
+              onPress={() => handleDeleteAviso(item.id)}
+            />
+          </View>
+        )}
+      />
+
       <Button title="Sair do modo Admin" onPress={handleLogout} />
-    </View>
+    </ScrollView>
   );
 };
 
@@ -77,6 +87,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 20,
+    backgroundColor: "#fff",
   },
   title: {
     fontSize: 24,
