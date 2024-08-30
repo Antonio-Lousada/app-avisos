@@ -5,27 +5,29 @@ import {
   FlatList,
   TouchableOpacity,
   StyleSheet,
+  Button,
+  Alert,
 } from "react-native";
-import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const HomeScreen = ({ navigation }) => {
   const [avisos, setAvisos] = useState([]);
   const [lidos, setLidos] = useState({});
+  const [isAdmin, setIsAdmin] = useState(false); // Estado para verificar se o usuário está logado como admin
 
   useEffect(() => {
-    // Mocking a GET request to fetch notices
-    axios
-      .get("https://mocked-api.com/avisos")
-      .then((response) => setAvisos(response.data))
-      .catch((error) => console.error(error));
+    // Carrega os avisos e os avisos lidos do AsyncStorage ao iniciar o componente
+    const loadAvisos = async () => {
+      const avisosData = await AsyncStorage.getItem("avisos");
+      setAvisos(JSON.parse(avisosData) || []);
+    };
 
-    // Load read notices from AsyncStorage
     const loadLidos = async () => {
       const lidosData = await AsyncStorage.getItem("lidos");
       setLidos(JSON.parse(lidosData) || {});
     };
 
+    loadAvisos();
     loadLidos();
   }, []);
 
@@ -34,6 +36,32 @@ const HomeScreen = ({ navigation }) => {
     setLidos(newLidos);
     await AsyncStorage.setItem("lidos", JSON.stringify(newLidos));
     navigation.navigate("Detail", { avisoId: id });
+  };
+
+  const handleAdminLogin = () => {
+    Alert.prompt(
+      "Admin Login",
+      "Digite o usuário e a senha",
+      [
+        {
+          text: "Cancelar",
+          style: "cancel",
+        },
+        {
+          text: "OK",
+          onPress: (text) => {
+            const [username, password] = text.split(" ");
+            if (username === "admin" && password === "1234") {
+              setIsAdmin(true);
+              navigation.navigate("Admin");
+            } else {
+              Alert.alert("Erro", "Usuário ou senha incorretos");
+            }
+          },
+        },
+      ],
+      "plain-text"
+    );
   };
 
   const renderItem = ({ item }) => (
@@ -46,10 +74,21 @@ const HomeScreen = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
+      {isAdmin && (
+        <Button
+          title="Adicionar Aviso"
+          onPress={() => navigation.navigate("Admin")}
+        />
+      )}
       <FlatList
         data={avisos}
         renderItem={renderItem}
         keyExtractor={(item) => item.id.toString()}
+      />
+      <Button
+        title="adm"
+        onPress={handleAdminLogin}
+        style={styles.adminButton}
       />
     </View>
   );
@@ -70,6 +109,11 @@ const styles = StyleSheet.create({
   },
   naoLido: {
     color: "#000",
+  },
+  adminButton: {
+    position: "absolute",
+    top: 10,
+    left: 10,
   },
 });
 

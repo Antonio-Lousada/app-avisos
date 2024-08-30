@@ -3,6 +3,7 @@ import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
 import HomeScreen from "./screens/HomeScreen";
 import DetailScreen from "./screens/DetailScreen";
+import AdminScreen from "./screens/AdminScreen"; // Nova tela de administração
 
 const Stack = createStackNavigator();
 
@@ -19,6 +20,11 @@ const Navigation = () => {
           name="Detail"
           component={DetailScreen}
           options={{ title: "Detalhes do Aviso" }}
+        />
+        <Stack.Screen
+          name="Admin"
+          component={AdminScreen}
+          options={{ title: "Administração" }}
         />
       </Stack.Navigator>
     </NavigationContainer>
