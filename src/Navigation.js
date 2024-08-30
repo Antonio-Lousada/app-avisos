@@ -3,7 +3,7 @@ import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
 import HomeScreen from "./screens/HomeScreen";
 import DetailScreen from "./screens/DetailScreen";
-import AdminScreen from "./screens/AdminScreen"; // Nova tela de administração
+import AdminScreen from "./screens/AdminScreen";
 
 const Stack = createStackNavigator();
 

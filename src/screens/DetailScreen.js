@@ -2,13 +2,7 @@ import React from "react";
 import { View, Text, StyleSheet } from "react-native";
 
 const DetailScreen = ({ route }) => {
-  const { avisoId } = route.params;
-  // Mocking the details of the notice
-  const aviso = {
-    id: avisoId,
-    titulo: `Aviso ${avisoId}`,
-    descricao: `Detalhes do aviso ${avisoId}. Aqui está o conteúdo completo do aviso...`,
-  };
+  const { aviso } = route.params;
 
   return (
     <View style={styles.container}>

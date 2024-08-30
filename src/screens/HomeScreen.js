@@ -16,18 +16,18 @@ const HomeScreen = ({ navigation }) => {
   const [isAdmin, setIsAdmin] = useState(false); // Estado para verificar se o usuário está logado como admin
 
   useEffect(() => {
-    // Carrega os avisos e os avisos lidos do AsyncStorage ao iniciar o componente
     const loadAvisos = async () => {
       const avisosData = await AsyncStorage.getItem("avisos");
       setAvisos(JSON.parse(avisosData) || []);
     };
+
+    loadAvisos();
 
     const loadLidos = async () => {
       const lidosData = await AsyncStorage.getItem("lidos");
       setLidos(JSON.parse(lidosData) || {});
     };
 
-    loadAvisos();
     loadLidos();
   }, []);
 
@@ -35,13 +35,15 @@ const HomeScreen = ({ navigation }) => {
     const newLidos = { ...lidos, [id]: true };
     setLidos(newLidos);
     await AsyncStorage.setItem("lidos", JSON.stringify(newLidos));
-    navigation.navigate("Detail", { avisoId: id });
+    // Navegar para a tela de detalhes passando o título e a descrição do aviso
+    const aviso = avisos.find((aviso) => aviso.id === id);
+    navigation.navigate("Detail", { aviso });
   };
 
   const handleAdminLogin = () => {
     Alert.prompt(
       "Admin Login",
-      "Digite o usuário e a senha",
+      "Digite a senha de administrador",
       [
         {
           text: "Cancelar",
@@ -49,18 +51,17 @@ const HomeScreen = ({ navigation }) => {
         },
         {
           text: "OK",
-          onPress: (text) => {
-            const [username, password] = text.split(" ");
-            if (username === "admin" && password === "1234") {
+          onPress: (password) => {
+            if (password === "admin1234") {
               setIsAdmin(true);
               navigation.navigate("Admin");
             } else {
-              Alert.alert("Erro", "Usuário ou senha incorretos");
+              Alert.alert("Erro", "Senha incorreta");
             }
           },
         },
       ],
-      "plain-text"
+      "secure-text" // Campo de senha
     );
   };
 
