@@ -13,7 +13,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 const HomeScreen = ({ navigation }) => {
   const [avisos, setAvisos] = useState([]);
   const [lidos, setLidos] = useState({});
-  const [isAdmin, setIsAdmin] = useState(false); // Estado para verificar se o usuário está logado como admin
+  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
     const loadAvisos = async () => {
@@ -35,9 +35,7 @@ const HomeScreen = ({ navigation }) => {
     const newLidos = { ...lidos, [id]: true };
     setLidos(newLidos);
     await AsyncStorage.setItem("lidos", JSON.stringify(newLidos));
-    // Navegar para a tela de detalhes passando o título e a descrição do aviso
-    const aviso = avisos.find((aviso) => aviso.id === id);
-    navigation.navigate("Detail", { aviso });
+    navigation.navigate("Detail", { avisoId: id });
   };
 
   const handleAdminLogin = () => {
@@ -61,7 +59,7 @@ const HomeScreen = ({ navigation }) => {
           },
         },
       ],
-      "secure-text" // Campo de senha
+      "secure-text"
     );
   };
 

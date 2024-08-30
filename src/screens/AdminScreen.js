@@ -1,20 +1,20 @@
 import React, { useState, useEffect } from "react";
 import {
   View,
+  Text,
   TextInput,
   Button,
   FlatList,
-  Text,
+  TouchableOpacity,
   StyleSheet,
   Alert,
-  TouchableOpacity,
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const AdminScreen = ({ navigation }) => {
+  const [avisos, setAvisos] = useState([]);
   const [titulo, setTitulo] = useState("");
   const [descricao, setDescricao] = useState("");
-  const [avisos, setAvisos] = useState([]);
 
   useEffect(() => {
     const loadAvisos = async () => {
@@ -25,57 +25,58 @@ const AdminScreen = ({ navigation }) => {
     loadAvisos();
   }, []);
 
-  const adicionarAviso = async () => {
-    if (titulo && descricao) {
-      const newAviso = { id: Date.now(), titulo, descricao };
-      const updatedAvisos = [...avisos, newAviso];
-      setAvisos(updatedAvisos);
-      await AsyncStorage.setItem("avisos", JSON.stringify(updatedAvisos));
-      setTitulo("");
-      setDescricao("");
-    } else {
-      Alert.alert("Erro", "Preencha todos os campos");
-    }
+  const handleAddAviso = async () => {
+    const newAviso = {
+      id: Date.now(),
+      titulo,
+      descricao,
+    };
+    const updatedAvisos = [...avisos, newAviso];
+    setAvisos(updatedAvisos);
+    await AsyncStorage.setItem("avisos", JSON.stringify(updatedAvisos));
+    setTitulo("");
+    setDescricao("");
   };
 
-  const excluirAviso = async (id) => {
+  const handleDeleteAviso = async (id) => {
     const updatedAvisos = avisos.filter((aviso) => aviso.id !== id);
     setAvisos(updatedAvisos);
     await AsyncStorage.setItem("avisos", JSON.stringify(updatedAvisos));
   };
 
-  const logout = () => {
-    navigation.goBack(); // Voltar para a tela anterior
+  const handleLogout = () => {
+    navigation.navigate("Home");
   };
 
   return (
     <View style={styles.container}>
       <TextInput
-        style={styles.input}
-        placeholder="Título do Aviso"
+        placeholder="Título"
         value={titulo}
         onChangeText={setTitulo}
+        style={styles.input}
       />
       <TextInput
-        style={styles.input}
-        placeholder="Descrição do Aviso"
+        placeholder="Descrição"
         value={descricao}
         onChangeText={setDescricao}
+        style={styles.input}
+        multiline
       />
-      <Button title="Adicionar Aviso" onPress={adicionarAviso} />
+      <Button title="Adicionar Aviso" onPress={handleAddAviso} />
       <FlatList
         data={avisos}
         renderItem={({ item }) => (
-          <View style={styles.avisoContainer}>
-            <Text style={styles.avisoTitulo}>{item.titulo}</Text>
-            <TouchableOpacity onPress={() => excluirAviso(item.id)}>
-              <Text style={styles.excluirButton}>Excluir</Text>
+          <View style={styles.avisoItem}>
+            <Text>{item.titulo}</Text>
+            <TouchableOpacity onPress={() => handleDeleteAviso(item.id)}>
+              <Text style={styles.deleteButton}>Excluir</Text>
             </TouchableOpacity>
           </View>
         )}
         keyExtractor={(item) => item.id.toString()}
       />
-      <Button title="Sair do Modo Admin" onPress={logout} />
+      <Button title="Sair do modo Admin" onPress={handleLogout} />
     </View>
   );
 };
@@ -86,23 +87,19 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   input: {
-    height: 40,
-    borderColor: "#ccc",
-    borderWidth: 1,
+    borderBottomWidth: 1,
+    borderBottomColor: "#ccc",
     marginBottom: 10,
-    padding: 10,
+    padding: 5,
   },
-  avisoContainer: {
+  avisoItem: {
     flexDirection: "row",
     justifyContent: "space-between",
-    padding: 20,
+    padding: 10,
     borderBottomWidth: 1,
     borderBottomColor: "#ccc",
   },
-  avisoTitulo: {
-    fontSize: 16,
-  },
-  excluirButton: {
+  deleteButton: {
     color: "red",
   },
 });
